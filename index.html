@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F59E0B">
+<title>APP MARCO</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>
+:root{--ink:#111827;--bg:#FFFBEB;--yellow:#FDE047;--green:#10B981;--blue:#3B82F6;--orange:#F59E0B}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Verdana,"Segoe UI",Arial,sans-serif}
+.app{max-width:720px;margin:0 auto;padding:12px 12px 90px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+h1{font-size:22px;margin:0;letter-spacing:.04em}
+.sub{font-size:13px;font-weight:700;margin:0 0 12px;min-height:18px}
+.btn{font:inherit;font-weight:900;text-transform:uppercase;border:3px solid var(--ink);border-radius:14px;padding:12px 14px;background:#fff;box-shadow:0 3px 0 var(--ink);cursor:pointer;font-size:14px;color:var(--ink)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn:disabled{opacity:.45}
+.btn.y{background:var(--yellow)}.btn.g{background:var(--green);color:#fff}.btn.b{background:var(--blue);color:#fff}.btn.o{background:var(--orange)}.btn.r{background:#FCA5A5}.btn.s{padding:8px 10px;font-size:12px}
+.card{background:#fff;border:3px solid var(--ink);border-radius:18px;padding:14px;margin-bottom:14px;box-shadow:0 4px 0 var(--ink)}
+.card h2{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:8px;text-transform:uppercase}
+.num{display:inline-flex;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.card.ok .num{background:var(--green)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.info{font-size:13px;margin:6px 0;line-height:1.45}
+.err{color:#B91C1C;font-weight:700}
+.warn{color:#92400E;font-weight:700}
+textarea{width:100%;min-height:90px;border:3px solid var(--ink);border-radius:12px;padding:8px;font-family:monospace;font-size:12px;margin-top:8px;display:none}
+textarea.open{display:block}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.thumb{position:relative;border:3px solid var(--ink);border-radius:10px;overflow:hidden;aspect-ratio:16/10;background:#fff;cursor:pointer}
+.thumb img,.thumb svg{width:100%;height:100%;object-fit:contain;display:block}
+.thumb .tag{position:absolute;left:4px;top:4px;background:var(--ink);color:#fff;font-weight:900;font-size:12px;border-radius:8px;padding:1px 6px}
+.thumb .kind{position:absolute;right:4px;bottom:4px;font-size:14px}
+.thumb.sel{outline:5px solid var(--orange)}
+.bar{height:14px;border:2px solid var(--ink);border-radius:8px;overflow:hidden;background:#F3F4F6;margin-top:8px}
+.bar>div{height:100%;background:var(--green);width:0;transition:width .3s}
+.modal{position:fixed;inset:0;background:rgba(17,24,39,.7);display:none;align-items:center;justify-content:center;padding:14px;z-index:50}
+.modal.open{display:flex}
+.modal .card{width:100%;max-width:480px;max-height:92vh;overflow:auto;margin:0}
+label.l{display:block;font-weight:900;font-size:13px;margin-top:6px}
+input[type=text],input[type=password],select{width:100%;font:inherit;border:3px solid var(--ink);border-radius:10px;padding:10px;margin:6px 0 8px;background:#fff}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--yellow);font-weight:900;padding:10px 16px;border-radius:12px;display:none;z-index:70;text-align:center;max-width:92%;font-size:14px}
+.layer{position:fixed;inset:0;z-index:40;display:none;overflow:auto}
+.layer.open{display:block}
+#viewer{background:#FFFDF7}
+#mappaView{background:#E5E7EB}
+.mtools{position:sticky;top:0;z-index:2;display:flex;gap:8px;justify-content:center;padding:10px;background:#E5E7EB}
+.mwrap{display:flex;justify-content:center;padding-bottom:20px}
+.foglio{width:794px;height:1123px;background:#FFFBEB;padding:38px 44px;display:flex;flex-direction:column;text-transform:uppercase;transform-origin:top center;flex-shrink:0}
+.foglio h3{margin:0 0 14px;text-align:center;font-size:27px;letter-spacing:.04em}
+.mboxes{flex:1;display:flex;flex-direction:column}
+.mbox{flex:1;display:flex;align-items:center;gap:12px;border:3px solid var(--ink);border-radius:18px;padding:8px 14px;overflow:hidden;box-shadow:4px 4px 0 var(--ink)}
+.mico{font-size:42px;width:56px;text-align:center;flex-shrink:0}
+.mn{display:inline-block;background:var(--ink);color:#fff;border-radius:50%;width:32px;height:32px;line-height:32px;text-align:center;margin-right:8px;font-size:18px}
+.mtit{font-weight:900;font-size:22px;margin-bottom:4px;letter-spacing:.03em}
+.mtxt{font-weight:700;font-size:20px;line-height:1.3;letter-spacing:.03em}
+.mfr{text-align:center;font-size:22px;line-height:1;height:26px;font-weight:900}
+@media print{
+  @page{size:A4;margin:0}
+  html,body{background:#fff}
+  body>*:not(#mappaView){display:none!important}
+  #mappaView{position:static;display:block!important;overflow:visible;background:#fff}
+  .mtools{display:none!important}
+  .mwrap{display:block;padding:0}
+  .foglio{transform:none!important;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <h1>📚 APP MARCO</h1>
+    <button class="btn s" id="bSettings">⚙️ IMPOSTAZIONI</button>
+  </header>
+  <p class="sub" id="projTitle">NESSUN COMPITO CARICATO</p>
+
+  <div class="card" id="c1">
+    <h2><span class="num">1</span> STORIA DI GEMINI</h2>
+    <p class="info">In Gemini tocca "Copia" sul blocco del file storia, poi qui:</p>
+    <div class="row">
+      <button class="btn y" id="bPaste">📋 INCOLLA STORIA</button>
+      <button class="btn s" id="bManual">✍️ INCOLLA A MANO</button>
+      <button class="btn s" id="bFile">📄 CARICA FILE</button>
+      <input type="file" id="fStory" accept=".txt,.json,text/plain,application/json" hidden>
+    </div>
+    <textarea id="taStory" placeholder="Incolla qui il file storia..."></textarea>
+    <div class="row" id="manualRow" style="display:none"><button class="btn g s" id="bUseText">✅ USA QUESTO TESTO</button></div>
+    <div class="info" id="i1"></div>
+  </div>
+
+  <div class="card" id="c2">
+    <h2><span class="num">2</span> VIGNETTE (FACOLTATIVE)</h2>
+    <p class="info">Carica l'immagine con tutte le vignette: l'app le ritaglia e le mette in ordine. Senza immagini usa i disegni automatici.</p>
+    <div class="row">
+      <button class="btn y" id="bImgs">🖼️ CARICA VIGNETTE</button>
+      <input type="file" id="fImgs" accept="image/*" multiple hidden>
+      <input type="file" id="fOne" accept="image/*" hidden>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="row" id="selRow" style="display:none">
+      <button class="btn s" id="bReplace">📷 SOSTITUISCI</button>
+      <button class="btn s r" id="bRemove">🗑️ USA IL DISEGNO</button>
+    </div>
+    <div class="info" id="i2"></div>
+  </div>
+
+  <div class="card" id="c3">
+    <h2><span class="num">3</span> VOCE</h2>
+    <p class="info">Genera la voce di ogni tavola. Le voci restano salvate: se si blocca, ripremi e riparte da dove era.</p>
+    <div class="row"><button class="btn g" id="bVoices">🔊 GENERA VOCI</button></div>
+    <div class="bar"><div id="vBar"></div></div>
+    <div class="info" id="i3"></div>
+  </div>
+
+  <div class="card" id="c4">
+    <h2><span class="num">4</span> CONTROLLA E STAMPA</h2>
+    <div class="row">
+      <button class="btn b" id="bPreview">👀 GUARDA IL FUMETTO</button>
+      <button class="btn o" id="bMap">🗺️ MAPPA DA STAMPARE</button>
+    </div>
+  </div>
+
+  <div class="card" id="c5">
+    <h2><span class="num">5</span> FILE PER MARCO</h2>
+    <p class="info">Crea un file unico con disegni e voci: funziona sul tablet anche senza internet.</p>
+    <div class="row"><button class="btn g" id="bExport">📲 CREA FILE PER MARCO</button></div>
+    <div class="info" id="i5"></div>
+  </div>
+</div>
+
+<div class="layer" id="viewer"></div>
+<div class="layer" id="mappaView">
+  <div class="mtools"><button class="btn g" id="bPrint">🖨️ STAMPA / SALVA PDF</button><button class="btn r" id="bCloseMap">✖ CHIUDI</button></div>
+  <div class="mwrap"><div class="foglio" id="foglio"></div></div>
+</div>
+
+<div class="modal" id="mSettings"><div class="card">
+  <h2>⚙️ IMPOSTAZIONI</h2>
+  <label class="l">CHIAVE GOOGLE AI STUDIO</label>
+  <input type="password" id="inKey" placeholder="Incolla la chiave" autocomplete="off">
+  <label class="l">VOCE</label>
+  <select id="inVoice"></select>
+  <div class="row">
+    <button class="btn g" id="bSaveSet">💾 SALVA</button>
+    <button class="btn s" id="bTestVoice">🔊 PROVA VOCE</button>
+    <button class="btn s" id="bShowKey">👁️ MOSTRA CHIAVE</button>
+  </div>
+  <div class="info" id="iSet"></div>
+  <div class="row"><button class="btn s r" id="bReset">🗑️ CANCELLA COMPITO ATTUALE</button><button class="btn s" id="bCloseSet">CHIUDI</button></div>
+</div></div>
+
+<div class="modal" id="mExport"><div class="card">
+  <h2>✅ FILE PRONTO</h2>
+  <p class="info" id="iExp"></p>
+  <div class="row">
+    <button class="btn g" id="bShare">📤 INVIA (WHATSAPP...)</button>
+    <button class="btn b" id="bDownload">📥 SCARICA</button>
+    <button class="btn s" id="bCloseExp">CHIUDI</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ======================= PLAYER (usato anche nel file per Marco) ======================= */
+const PLAYER_CSS = `
+body{margin:0;background:#FFFDF7}
+.pm{max-width:760px;margin:0 auto;padding:10px;display:flex;flex-direction:column;gap:10px;min-height:100vh;font-family:Verdana,Arial,sans-serif;text-transform:uppercase;color:#111827;background:#FFFDF7;box-sizing:border-box}
+.pm *{box-sizing:border-box}
+.pm-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pm-count{font-weight:900;font-size:16px;background:#fff;border:3px solid #111827;border-radius:10px;padding:4px 10px}
+.pm-dots{display:flex;gap:6px;flex-wrap:wrap}.pm-dots span{width:13px;height:13px;border-radius:50%;border:2px solid #111827;background:#D1D5DB;display:inline-block}.pm-dots .on{background:#F59E0B;transform:scale(1.3)}.pm-dots .done{background:#10B981}
+.pm-title{font-weight:900;font-size:20px;background:#FDE047;border:3px solid #111827;border-radius:12px;padding:8px 12px;align-self:flex-start;letter-spacing:.03em}
+.pm-frame{position:relative;width:100%;aspect-ratio:16/10;border:4px solid #111827;border-radius:16px;overflow:hidden;background:#fff}
+.pm-stage,.pm-stage svg,.pm-stage img{width:100%;height:100%;display:block;object-fit:contain}
+.pm-balloon{position:absolute;top:8px;left:50%;transform:translateX(-50%);max-width:92%;background:#fff;border:3px solid #111827;border-radius:16px;padding:6px 12px;text-align:center;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.pm-speaker{font-size:12px;font-weight:900;color:#BE185D}.pm-btext{font-size:16px;font-weight:900;line-height:1.3}
+.pm-narr{background:#fff;border:3px solid #111827;border-radius:16px;padding:10px 12px;box-shadow:0 3px 0 #111827;transition:background .15s}
+.pm-narr.reading{background:#FEF08A;outline:4px solid #2563EB}
+.pm-tag{display:inline-block;font-size:12px;font-weight:900;background:#DBEAFE;border:2px solid #111827;border-radius:8px;padding:2px 8px;margin-bottom:6px}
+.pm-ntext{margin:0;font-size:20px;line-height:1.55;font-weight:700;letter-spacing:.05em;word-spacing:.12em}
+.pm-focus{display:flex;gap:8px;align-items:flex-start;background:#DCFCE7;border:3px solid #111827;border-radius:16px;padding:9px 12px}
+.pm-focus>span{font-size:24px}.pm-flabel{font-size:12px;font-weight:900;color:#065F46}.pm-ftext{margin:2px 0 0;font-size:17px;font-weight:900;line-height:1.4;letter-spacing:.04em}
+.pm-nav{margin-top:auto;display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;position:sticky;bottom:0;background:#FFFDF7;padding:6px 0 4px}
+.pm-btn{font:inherit;font-weight:900;font-size:16px;text-transform:uppercase;border:3px solid #111827;border-radius:14px;padding:14px 6px;box-shadow:0 4px 0 #111827;background:#E5E7EB;cursor:pointer;color:#111827}
+.pm-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #111827}
+.pm-btn:disabled{opacity:.4}.pm-play{background:#10B981;color:#fff}.pm-play.on{background:#EF4444}.pm-next{background:#F59E0B}.pm-close{background:#FCA5A5;padding:6px 10px;font-size:13px;box-shadow:0 2px 0 #111827}
+@media(max-width:480px){.pm-ntext{font-size:17px}.pm-btn{font-size:14px;padding:12px 4px}.pm-title{font-size:17px}}
+`;
+
+function playerMain(DATA, root, opts) {
+  opts = opts || {};
+  var i = 0, audio = null, speaking = false;
+  root.innerHTML =
+    '<div class="pm">' +
+    '<div class="pm-top">' + (opts.onClose ? '<button class="pm-btn pm-close" data-a="close">✖ CHIUDI</button>' : '') +
+    '<div class="pm-count"></div><div class="pm-dots"></div></div>' +
+    '<div class="pm-title"></div>' +
+    '<div class="pm-frame"><div class="pm-stage"></div><div class="pm-balloon"><div class="pm-speaker"></div><div class="pm-btext"></div></div></div>' +
+    '<div class="pm-narr"><div class="pm-tag">🗣️ IL NARRATORE RACCONTA</div><p class="pm-ntext"></p></div>' +
+    '<div class="pm-focus"><span>💡</span><div><div class="pm-flabel">RICORDA:</div><p class="pm-ftext"></p></div></div>' +
+    '<div class="pm-nav"><button class="pm-btn pm-prev" data-a="prev">⬅️ INDIETRO</button><button class="pm-btn pm-play" data-a="play">🔊 ASCOLTA</button><button class="pm-btn pm-next" data-a="next">AVANTI ➡️</button></div>' +
+    '</div>';
+  function q(s) { return root.querySelector(s); }
+  function ui() {
+    var b = q('.pm-play');
+    b.textContent = speaking ? '⏹️ STOP' : '🔊 ASCOLTA';
+    b.classList.toggle('on', speaking);
+    q('.pm-narr').classList.toggle('reading', speaking);
+  }
+  function stop() {
+    if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
+    try { window.speechSynthesis && speechSynthesis.cancel(); } catch (e) {}
+    speaking = false; ui();
+  }
+  function render() {
+    stop();
+    var t = DATA.tavole[i], n = DATA.tavole.length;
+    q('.pm-count').textContent = 'TAVOLA ' + (i + 1) + ' DI ' + n;
+    q('.pm-dots').innerHTML = DATA.tavole.map(function (_, k) { return '<span class="' + (k === i ? 'on' : k < i ? 'done' : '') + '"></span>'; }).join('');
+    q('.pm-title').textContent = t.titolo;
+    q('.pm-stage').innerHTML = t.img ? '<img src="' + t.img + '" alt="">' : (t.svg || '');
+    var hasD = !!(t.dialogo && t.dialogo.trim());
+    q('.pm-balloon').style.display = hasD ? '' : 'none';
+    q('.pm-speaker').textContent = t.parlante || '';
+    q('.pm-btext').textContent = t.dialogo || '';
+    q('.pm-ntext').textContent = t.narratore;
+    q('.pm-ftext').textContent = t.focus;
+    q('.pm-focus').style.display = t.focus ? '' : 'none';
+    q('.pm-prev').disabled = i === 0;
+    q('.pm-next').textContent = i === n - 1 ? '🔁 DA CAPO' : 'AVANTI ➡️';
+    window.scrollTo(0, 0);
+  }
+  function done() { speaking = false; audio = null; ui(); }
+  function play() {
+    if (speaking) { stop(); return; }
+    var t = DATA.tavole[i];
+    if (t.audio) {
+      audio = new Audio(t.audio);
+      speaking = true; ui();
+      audio.onended = done; audio.onerror = done;
+      var p = audio.play(); if (p && p.catch) p.catch(done);
+    } else if (window.speechSynthesis) {
+      try {
+        var u = new SpeechSynthesisUtterance(t.parlato || String(t.narratore).toLowerCase());
+        u.lang = 'it-IT'; u.rate = 0.9;
+        var v = speechSynthesis.getVoices().filter(function (x) { return /^it/i.test(x.lang); })[0];
+        if (v) u.voice = v;
+        u.onend = done; u.onerror = done;
+        speaking = true; ui();
+        speechSynthesis.speak(u);
+      } catch (e) { done(); }
+    }
+  }
+  root.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-a]'); if (!a) return;
+    var act = a.getAttribute('data-a');
+    if (act === 'prev' && i > 0) { i--; render(); }
+    else if (act === 'next') { i = (i + 1) % DATA.tavole.length; render(); }
+    else if (act === 'play') play();
+    else if (act === 'close') { stop(); opts.onClose(); }
+  });
+  render();
+  return { stop: stop };
+}
+
+/* ======================= KIT DI DISEGNO ======================= */
+const CartoonArt = {
+  K: 'stroke="#111827" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"',
+  backdrop(kind) {
+    const K = this.K;
+    if (kind === "aula") return `<rect width="600" height="400" fill="#FEF3C7"/>
+      <rect x="150" y="30" width="300" height="130" rx="8" fill="#166534" ${K}/>
+      <rect x="0" y="300" width="600" height="100" fill="#D6A16B" ${K}/>
+      <rect x="30" y="50" width="80" height="70" fill="#BAE6FD" ${K}/><line x1="70" y1="50" x2="70" y2="120" ${K}/>`;
+    if (kind === "casa") return `<rect width="600" height="400" fill="#FCE7F3"/>
+      <rect x="440" y="40" width="130" height="110" fill="#BAE6FD" ${K}/><line x1="505" y1="40" x2="505" y2="150" ${K}/>
+      <rect x="0" y="300" width="600" height="100" fill="#A16207" ${K}/>`;
+    return `<rect width="600" height="400" fill="#BAE6FD"/>
+      <circle cx="540" cy="55" r="30" fill="#FDE047" ${K}/>
+      <path d="M40,80 Q55,55 80,65 Q105,50 125,70 Q145,75 135,92 L35,92 Q22,88 40,80 Z" fill="#FFF" ${K}/>
+      <path d="M0,290 Q300,260 600,290 L600,400 L0,400 Z" fill="#86EFAC" ${K}/>
+      <rect x="40" y="200" width="20" height="90" fill="#92400E" ${K}/><circle cx="50" cy="180" r="42" fill="#22C55E" ${K}/>`;
+  },
+  kid(x, y, s, o) {
+    o = o || {}; s = s || 1;
+    const K = this.K, shirt = o.shirt || "#3B82F6", pants = o.pants || "#1E3A8A", hair = o.hair || "#92400E", skin = o.skin || "#FCD9B6";
+    const mood = o.mood || "happy", arms = o.arms || "down";
+    const mouth = { happy: `<path d="M-12,-104 Q0,-92 12,-104" fill="none" ${K}/>`, sad: `<path d="M-11,-96 Q0,-106 11,-96" fill="none" ${K}/>`,
+      think: `<line x1="-8" y1="-100" x2="9" y2="-102" ${K}/>`, surprised: `<ellipse cx="0" cy="-100" rx="6" ry="8" fill="#7F1D1D" ${K}/>` }[mood] || "";
+    const armL = arms === "up" ? "M-26,-78 L-48,-120" : "M-26,-78 L-40,-42";
+    const armR = { wave: "M26,-78 L50,-118", give: "M26,-78 L66,-74", up: "M26,-78 L48,-120" }[arms] || "M26,-78 L40,-42";
+    const girl = o.girl ? `<circle cx="-30" cy="-138" r="12" fill="${hair}" ${K}/><circle cx="30" cy="-138" r="12" fill="${hair}" ${K}/>` : "";
+    const bow = o.girl ? `<path d="M-14,-160 L0,-152 L14,-160 L14,-144 L0,-152 L-14,-144 Z" fill="#EC4899" ${K}/>` : "";
+    const think = mood === "think" ? `<circle cx="40" cy="-160" r="5" fill="#FFF" ${K}/><circle cx="56" cy="-176" r="8" fill="#FFF" ${K}/><ellipse cx="85" cy="-200" rx="24" ry="18" fill="#FFF" ${K}/><text x="85" y="-192" text-anchor="middle" font-size="24" font-weight="900" fill="#111827" font-family="Arial">?</text>` : "";
+    return `<g transform="translate(${x},${y}) scale(${s})">
+      <rect x="-18" y="-42" width="14" height="40" fill="${pants}" ${K}/><rect x="4" y="-42" width="14" height="40" fill="${pants}" ${K}/>
+      <ellipse cx="-12" cy="0" rx="13" ry="6" fill="#111827"/><ellipse cx="12" cy="0" rx="13" ry="6" fill="#111827"/>
+      <path d="${armL}" fill="none" stroke="#111827" stroke-width="13" stroke-linecap="round"/><path d="${armL}" fill="none" stroke="${skin}" stroke-width="7" stroke-linecap="round"/>
+      <path d="${armR}" fill="none" stroke="#111827" stroke-width="13" stroke-linecap="round"/><path d="${armR}" fill="none" stroke="${skin}" stroke-width="7" stroke-linecap="round"/>
+      <path d="M-28,-90 Q0,-98 28,-90 L24,-40 L-24,-40 Z" fill="${shirt}" ${K}/>
+      ${girl}<circle cx="0" cy="-122" r="30" fill="${skin}" ${K}/>
+      <path d="M-30,-128 Q-28,-160 0,-158 Q28,-160 30,-128 Q14,-142 0,-138 Q-14,-142 -30,-128 Z" fill="${hair}" ${K}/>${bow}
+      <circle cx="-10" cy="-120" r="4" fill="#111827"/><circle cx="10" cy="-120" r="4" fill="#111827"/>
+      <circle cx="-18" cy="-108" r="4" fill="#FCA5A5"/><circle cx="18" cy="-108" r="4" fill="#FCA5A5"/>${mouth}${think}</g>`;
+  },
+  adult(x, y, s, o) { return this.kid(x, y, (s || 1) * 1.3, Object.assign({ pants: "#374151" }, o)); },
+  heart(x, y, s, c) { return `<path transform="translate(${x},${y}) scale(${s || 1})" d="M0,12 C-30,-10 -18,-34 0,-20 C18,-34 30,-10 0,12 Z" fill="${c || "#EF4444"}" ${this.K}/>`; },
+  star(x, y, s, c) { return `<path transform="translate(${x},${y}) scale(${s || 1})" d="M0,-20 L6,-6 L21,-6 L9,3 L13,18 L0,9 L-13,18 L-9,3 L-21,-6 L-6,-6 Z" fill="${c || "#FACC15"}" ${this.K}/>`; },
+  book(x, y, s, c) { return `<g transform="translate(${x},${y}) scale(${s || 1})"><rect x="-32" y="-24" width="64" height="48" rx="5" fill="${c || "#F97316"}" ${this.K}/><rect x="-24" y="-17" width="48" height="34" rx="3" fill="#FFF" ${this.K}/><line x1="0" y1="-17" x2="0" y2="17" ${this.K}/></g>`; },
+  pencil(x, y, s, c) { return `<g transform="translate(${x},${y}) scale(${s || 1}) rotate(-30)"><rect x="-30" y="-6" width="50" height="12" fill="${c || "#FACC15"}" ${this.K}/><path d="M20,-6 L34,0 L20,6 Z" fill="#FCD9B6" ${this.K}/><rect x="-38" y="-6" width="9" height="12" fill="#F472B6" ${this.K}/></g>`; },
+  paper(x, y, s) { return `<g transform="translate(${x},${y}) scale(${s || 1})"><rect x="-30" y="-38" width="60" height="76" fill="#FFF" ${this.K}/>${[-22, -8, 6, 20].map(l => `<line x1="-20" y1="${l}" x2="20" y2="${l}" stroke="#93C5FD" stroke-width="3"/>`).join("")}</g>`; },
+  jar(x, y, s) { return `<g transform="translate(${x},${y}) scale(${s || 1})"><rect x="-26" y="-74" width="52" height="12" rx="3" fill="#A78BFA" ${this.K}/><rect x="-32" y="-62" width="64" height="62" rx="12" fill="#E0F2FE" ${this.K}/>${this.heart(0, -30, 0.7)}</g>`; },
+  desk(x, y, w) { return `<g><rect x="${x}" y="${y}" width="${w}" height="16" fill="#B45309" ${this.K}/><rect x="${x + 10}" y="${y + 16}" width="12" height="60" fill="#78350F" ${this.K}/><rect x="${x + w - 22}" y="${y + 16}" width="12" height="60" fill="#78350F" ${this.K}/></g>`; },
+  calendar(x, y, s) {
+    let g = ""; for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) g += `<rect x="${-26 + c * 14}" y="${-6 + r * 14}" width="9" height="9" fill="#FCA5A5"/>`;
+    return `<g transform="translate(${x},${y}) scale(${s || 1})"><rect x="-34" y="-30" width="68" height="60" rx="6" fill="#FFF" ${this.K}/><rect x="-34" y="-30" width="68" height="16" fill="#EF4444" ${this.K}/>${g}</g>`;
+  },
+  bubble(x, y, s) { return `<g transform="translate(${x},${y}) scale(${s || 1})"><ellipse cx="0" cy="0" rx="40" ry="26" fill="#FFF" ${this.K}/><path d="M-10,22 L-22,44 L6,24" fill="#FFF" ${this.K}/><circle cx="-14" cy="0" r="4" fill="#111827"/><circle cx="0" cy="0" r="4" fill="#111827"/><circle cx="14" cy="0" r="4" fill="#111827"/></g>`; },
+  sign(x, y, kind, s) {
+    const m = { ok: `<circle r="30" fill="#22C55E" ${this.K}/><path d="M-14,0 L-4,12 L16,-12" fill="none" stroke="#FFF" stroke-width="7" stroke-linecap="round"/>`,
+      no: `<circle r="30" fill="#EF4444" ${this.K}/><path d="M-12,-12 L12,12 M12,-12 L-12,12" stroke="#FFF" stroke-width="7" stroke-linecap="round"/>`,
+      freccia: `<path d="M-30,-10 L10,-10 L10,-24 L36,0 L10,24 L10,10 L-30,10 Z" fill="#F59E0B" ${this.K}/>` };
+    return `<g transform="translate(${x},${y}) scale(${s || 1})">${m[kind] || m.ok}</g>`;
+  }
+};
+
+function composeScene(d) {
+  const A = CartoonArt; d = d || {};
+  const bg = ["aula", "parco", "casa"].includes(d.sfondo) ? d.sfondo : "parco";
+  const pers = (Array.isArray(d.personaggi) ? d.personaggi : []).slice(0, 3);
+  const ogg = (Array.isArray(d.oggetti) ? d.oggetti : []).map(o => String(o).toLowerCase().trim()).slice(0, 4);
+  let s = A.backdrop(bg);
+  if (ogg.includes("banco")) s += A.desk(60, 288, 480);
+  const xs = { 1: [300], 2: [210, 400], 3: [130, 300, 470] }[pers.length] || [];
+  const col = { rosso: "#EF4444", blu: "#3B82F6", verde: "#22C55E", giallo: "#FACC15", viola: "#A855F7", arancione: "#F97316" };
+  const mood = { felice: "happy", triste: "sad", pensa: "think", sorpreso: "surprised" };
+  const arms = { fermo: "down", saluta: "wave", porge: "give", braccia_su: "up" };
+  const hairs = ["#92400E", "#111827", "#B45309"], skins = ["#FCD9B6", "#C68642", "#F1C27D"];
+  pers.forEach((p, k) => {
+    p = p || {};
+    const tipo = String(p.tipo || "bambino").toLowerCase();
+    const o = { shirt: col[String(p.colore || "").toLowerCase()] || "#3B82F6", mood: mood[String(p.umore || "").toLowerCase()] || "happy",
+      arms: arms[String(p.gesto || "").toLowerCase()] || "down", girl: /a$/.test(tipo), hair: hairs[k % 3], skin: skins[k % 3] };
+    const sc = pers.length === 3 ? 0.88 : 1;
+    s += /^adult/.test(tipo) ? A.adult(xs[k], 378, sc * 0.95, o) : A.kid(xs[k], 378, sc, o);
+  });
+  const mapO = {
+    cuore: (x, y) => A.heart(x, y, 1.4), stella: (x, y) => A.star(x, y, 1.4), libro: (x, y) => A.book(x, y, 1.1),
+    matita: (x, y) => A.pencil(x, y, 1.2), foglio: (x, y) => A.paper(x, y, 0.9), barattolo: (x, y) => A.jar(x, y + 38, 0.9),
+    calendario: (x, y) => A.calendar(x, y, 1), fumetto: (x, y) => A.bubble(x, y, 1), ok: (x, y) => A.sign(x, y, "ok", 1.1),
+    no: (x, y) => A.sign(x, y, "no", 1.1), freccia: (x, y) => A.sign(x, y, "freccia", 1.1)
+  };
+  const slots = [[300, 100], [175, 110], [425, 110], [545, 235]];
+  let k = 0;
+  ogg.forEach(o => { if (o === "banco" || !mapO[o] || k >= slots.length) return; const [x, y] = slots[k++]; s += mapO[o](x, y); });
+  return `<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
+}
+
+/* ======================= UTILITÀ ======================= */
+const $ = id => document.getElementById(id);
+function toast(msg, ms) {
+  const t = $("toast"); t.textContent = msg; t.style.display = "block";
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.style.display = "none", ms || 3500);
+}
+function hash(str) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0; return h.toString(16); }
+const LS = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return LS._m[k] || null; } },
+  set(k, v) { LS._m[k] = v; try { localStorage.setItem(k, v); } catch (e) {} }, _m: {}
+};
+const DB = {
+  p: null,
+  open() {
+    if (this.p) return this.p;
+    this.p = new Promise(res => {
+      try { const r = indexedDB.open("app_marco", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }
+      catch (e) { res(null); }
+    });
+    return this.p;
+  },
+  async get(k) { const db = await this.open(); if (!db) return null; return new Promise(res => { try { const r = db.transaction("kv").objectStore("kv").get(k); r.onsuccess = () => res(r.result || null); r.onerror = () => res(null); } catch (e) { res(null); } }); },
+  async set(k, v) { const db = await this.open(); if (!db) return false; return new Promise(res => { try { const tx = db.transaction("kv", "readwrite"); tx.objectStore("kv").put(v, k); tx.oncomplete = () => res(true); tx.onerror = () => res(false); } catch (e) { res(false); } }); }
+};
+
+/* ======================= STATO ======================= */
+let P = { story: null, images: [], audio: [] };
+const VOICES = ["Sulafat","Achernar","Achird","Algenib","Algieba","Alnilam","Aoede","Autonoe","Callirrhoe","Charon","Despina","Enceladus","Erinome","Fenrir","Gacrux","Iapetus","Kore","Laomedeia","Leda","Orus","Puck","Pulcherrima","Rasalgethi","Sadachbia","Sadaltager","Schedar","Umbriel","Vindemiatrix","Zephyr","Zubenelgenubi"];
+function getKey() { return (LS.get("marco_api_key") || "").trim(); }
+function getVoice() { return LS.get("marco_voice") || "Sulafat"; }
+async function save() { await DB.set("progetto", P); }
+
+/* ======================= FILE STORIA: RIPARAZIONE E CONTROLLO ======================= */
+function fixNewlinesInStrings(t) {
+  let out = "", inS = false, esc = false;
+  for (let k = 0; k < t.length; k++) {
+    const c = t[k];
+    if (inS) {
+      if (esc) { out += c; esc = false; continue; }
+      if (c === "\\") { out += c; esc = true; continue; }
+      if (c === '"') { inS = false; out += c; continue; }
+      if (c === "\n" || c === "\t") {
+        const prev = out[out.length - 1] || "", next = t[k + 1] || "";
+        const letter = ch => /[A-Za-zÀ-ÿ0-9]/.test(ch);
+        out += (prev === " " || next === " ") ? "" : (letter(prev) && letter(next) ? "" : " ");
+        continue;
+      }
+      out += c;
+    } else { if (c === '"') inS = true; out += c; }
+  }
+  return out;
+}
+function repairJSON(raw) {
+  let t = String(raw || "").replace(/\r/g, "").replace(/ /g, " ").replace(/```(json)?/gi, "");
+  const a = t.indexOf("{"), b = t.lastIndexOf("}");
+  if (a < 0 || b < a) throw new Error("NON TROVO IL FILE STORIA (MANCANO LE PARENTESI { }).");
+  t = t.slice(a, b + 1);
+  const tries = [
+    s => fixNewlinesInStrings(s).replace(/,\s*([}\]])/g, "$1"),
+    s => fixNewlinesInStrings(s.replace(/[“”„«»]/g, '"')).replace(/,\s*([}\]])/g, "$1")
+  ];
+  let lastErr;
+  for (const f of tries) { try { return JSON.parse(f(t)); } catch (e) { lastErr = e; } }
+  throw new Error("IL FILE STORIA È ROVINATO: " + lastErr.message);
+}
+function normalizeStory(j) {
+  const U = s => String(s == null ? "" : s).replace(/\s+/g, " ").trim().toUpperCase();
+  const warn = [];
+  const st = {
+    titolo: U(j.titolo) || "COMPITO",
+    file: String(j.file || j.titolo || "compito").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9_]+/g, "_").replace(/^_+|_+$/g, "") || "compito_marco",
+    tipo: String(j.tipo || "").toLowerCase() === "esercizi" ? "esercizi" : "storia"
+  };
+  const m = Array.isArray(j.mappa) ? j.mappa : [];
+  const FIXICO = { "🔙": "⬅️", "🔜": "➡️", "🔚": "🏁", "🔛": "↔️", "🔝": "⬆️", "🆗": "✅", "🆕": "⭐", "🆒": "😎", "🆓": "🎁", "📅": "📌", "📆": "📌", "🗓️": "📌", "🗓": "📌" };
+  const fixIco = ic => { ic = Array.from(String(ic || "⭐").trim()).slice(0, 3).join("") || "⭐"; for (const k in FIXICO) ic = ic.split(k).join(FIXICO[k]); return ic; };
+  st.mappa = m.slice(0, 6).map(b => ({ icona: fixIco(b && b.icona), titolo: U(b && b.titolo), testo: U(b && b.testo) }));
+  if (m.length !== 6) warn.push(`LA MAPPA HA ${m.length} BOX INVECE DI 6.`);
+  const tv = Array.isArray(j.tavole) ? j.tavole : [];
+  if (!tv.length) throw new Error("NEL FILE STORIA NON CI SONO TAVOLE.");
+  if (tv.length > 12) warn.push("PIÙ DI 12 TAVOLE: TENGO LE PRIME 12.");
+  st.tavole = tv.slice(0, 12).map((t, k) => ({
+    titolo: U(t.titolo) || `${k + 1}.`, narratore: U(t.narratore), parlante: U(t.parlante), dialogo: U(t.dialogo), focus: U(t.focus),
+    disegno: (t.disegno && typeof t.disegno === "object") ? t.disegno : {}
+  }));
+  st.tavole.forEach((t, k) => { if (!t.narratore) warn.push(`TAVOLA ${k + 1}: MANCA IL NARRATORE.`); });
+  st.tavole.forEach(t => t.svg = composeScene(t.disegno));
+  return { st, warn };
+}
+async function loadStoryText(text) {
+  try {
+    const { st, warn } = normalizeStory(repairJSON(text));
+    const same = P.story && P.story.titolo === st.titolo && P.story.tavole.length === st.tavole.length;
+    P.story = st;
+    if (!same) { P.images = []; P.audio = []; }
+    P.images.length = st.tavole.length; P.audio.length = st.tavole.length;
+    await save();
+    $("i1").innerHTML = `✅ <b>${esc(st.titolo)}</b>: ${st.tavole.length} TAVOLE, MAPPA DA ${st.mappa.length} BOX (${st.tipo.toUpperCase()}).` +
+      (warn.length ? `<br><span class="warn">⚠️ ${warn.map(esc).join("<br>⚠️ ")}</span>` : "");
+    $("taStory").classList.remove("open"); $("manualRow").style.display = "none";
+    toast("✅ STORIA CARICATA!");
+    refresh();
+  } catch (e) {
+    $("i1").innerHTML = `<span class="err">❌ ${esc(e.message)}</span>`;
+    toast("❌ STORIA NON VALIDA");
+  }
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+/* ======================= VIGNETTE: TAGLIO AUTOMATICO ======================= */
+function fileToImage(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file); const im = new Image();
+    im.onload = () => res(im); im.onerror = () => rej(new Error("IMMAGINE NON LEGGIBILE")); im.src = url;
+  });
+}
+function canvasToJpeg(cv, maxW) {
+  maxW = maxW || 1200;
+  if (cv.width > maxW) { const c2 = document.createElement("canvas"); c2.width = maxW; c2.height = Math.round(cv.height * maxW / cv.width); c2.getContext("2d").drawImage(cv, 0, 0, c2.width, c2.height); cv = c2; }
+  return cv.toDataURL("image/jpeg", 0.86);
+}
+function splitPanels(im) {
+  const W = im.naturalWidth, H = im.naturalHeight;
+  const aw = Math.min(480, W), sc = aw / W, ah = Math.max(1, Math.round(H * sc));
+  const ac = document.createElement("canvas"); ac.width = aw; ac.height = ah;
+  const actx = ac.getContext("2d"); actx.drawImage(im, 0, 0, aw, ah);
+  const px = actx.getImageData(0, 0, aw, ah).data;
+  const N = aw * ah, mask = new Uint8Array(N), lab = new Int32Array(N);
+  for (let i = 0; i < N; i++) { const r = px[i * 4], g = px[i * 4 + 1], b = px[i * 4 + 2]; mask[i] = (0.299 * r + 0.587 * g + 0.114 * b) < 232 ? 1 : 0; }
+  const comps = []; let next = 1; const stack = new Int32Array(N);
+  for (let i = 0; i < N; i++) {
+    if (!mask[i] || lab[i]) continue;
+    let sp = 0, cnt = 0, x0 = aw, y0 = ah, x1 = 0, y1 = 0; stack[sp++] = i; lab[i] = next;
+    while (sp) {
+      const p = stack[--sp], x = p % aw, y = (p - x) / aw; cnt++;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      if (x > 0 && mask[p - 1] && !lab[p - 1]) { lab[p - 1] = next; stack[sp++] = p - 1; }
+      if (x < aw - 1 && mask[p + 1] && !lab[p + 1]) { lab[p + 1] = next; stack[sp++] = p + 1; }
+      if (y > 0 && mask[p - aw] && !lab[p - aw]) { lab[p - aw] = next; stack[sp++] = p - aw; }
+      if (y < ah - 1 && mask[p + aw] && !lab[p + aw]) { lab[p + aw] = next; stack[sp++] = p + aw; }
+    }
+    comps.push({ id: next, cnt, x0, y0, x1: x1 + 1, y1: y1 + 1 }); next++;
+  }
+  let big = comps.filter(c => (c.x1 - c.x0) * (c.y1 - c.y0) > 0.04 * N && c.cnt > 0.01 * N);
+  // scarta riquadri contenuti dentro altri (es. disegni interni)
+  big = big.filter(c => !big.some(o => o !== c && o.x0 <= c.x0 && o.y0 <= c.y0 && o.x1 >= c.x1 && o.y1 >= c.y1 && (o.x1 - o.x0) * (o.y1 - o.y0) > (c.x1 - c.x0) * (c.y1 - c.y0)));
+  const full = document.createElement("canvas"); full.width = W; full.height = H; full.getContext("2d").drawImage(im, 0, 0);
+  if (big.length < 2) return [canvasToJpeg(full)];
+  // ordine di lettura: righe (stesso inizio verticale), poi da sinistra a destra
+  big.sort((a, b) => a.y0 - b.y0);
+  const rows = [];
+  big.forEach(c => { const r = rows.find(r => Math.abs(r[0].y0 - c.y0) < ah * 0.12); r ? r.push(c) : rows.push([c]); });
+  const ordered = [].concat(...rows.map(r => r.sort((a, b) => a.x0 - b.x0)));
+  const ids = new Set(ordered.map(c => c.id));
+  return ordered.map(c => {
+    const X0 = Math.floor(c.x0 / sc), Y0 = Math.floor(c.y0 / sc), X1 = Math.min(W, Math.ceil(c.x1 / sc)), Y1 = Math.min(H, Math.ceil(c.y1 / sc));
+    const cw = X1 - X0, ch = Y1 - Y0;
+    const cv = document.createElement("canvas"); cv.width = cw; cv.height = ch;
+    const ctx = cv.getContext("2d"); ctx.drawImage(full, X0, Y0, cw, ch, 0, 0, cw, ch);
+    // sbianca i pezzi delle altre vignette che entrano nel riquadro (bordi a scalino)
+    const d = ctx.getImageData(0, 0, cw, ch), dd = d.data; let touched = false;
+    for (let y = 0; y < ch; y++) {
+      const ay = Math.min(ah - 1, Math.floor((Y0 + y) * sc));
+      for (let x = 0; x < cw; x++) {
+        const ax = Math.min(aw - 1, Math.floor((X0 + x) * sc)), l = lab[ay * aw + ax];
+        if (l && l !== c.id && ids.has(l)) { const o = (y * cw + x) * 4; dd[o] = dd[o + 1] = dd[o + 2] = 255; touched = true; }
+      }
+    }
+    if (touched) ctx.putImageData(d, 0, 0);
+    return canvasToJpeg(cv);
+  });
+}
+async function onImagesChosen(files) {
+  if (!P.story) { toast("PRIMA CARICA LA STORIA (PUNTO 1)"); return; }
+  files = Array.from(files || []).filter(f => /^image\//.test(f.type));
+  if (!files.length) return;
+  $("i2").textContent = "⏳ PREPARO LE VIGNETTE...";
+  try {
+    let panels = [];
+    files.sort((a, b) => (a.lastModified - b.lastModified) || a.name.localeCompare(b.name, undefined, { numeric: true }));
+    if (files.length === 1) panels = splitPanels(await fileToImage(files[0]));
+    else for (const f of files) { const im = await fileToImage(f); const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext("2d").drawImage(im, 0, 0); panels.push(canvasToJpeg(c)); }
+    const n = P.story.tavole.length;
+    for (let k = 0; k < n; k++) P.images[k] = panels[k] || null;
+    await save();
+    let msg = `✅ ${Math.min(panels.length, n)} VIGNETTE SU ${n} TAVOLE.`;
+    if (panels.length > n) msg += ` ⚠️ ${panels.length - n} IN PIÙ IGNORATE.`;
+    if (panels.length < n) msg += ` LE ALTRE USANO IL DISEGNO.`;
+    msg += " SE L'ORDINE È SBAGLIATO: TOCCA DUE VIGNETTE PER SCAMBIARLE.";
+    $("i2").textContent = msg;
+    refresh();
+  } catch (e) { $("i2").innerHTML = `<span class="err">❌ ${esc(e.message)}</span>`; }
+}
+let selThumb = -1;
+function renderThumbs() {
+  const box = $("thumbs");
+  if (!P.story) { box.innerHTML = ""; $("selRow").style.display = "none"; return; }
+  box.innerHTML = P.story.tavole.map((t, k) => `<div class="thumb${k === selThumb ? " sel" : ""}" data-k="${k}">${P.images[k] ? `<img src="${P.images[k]}" alt="">` : t.svg}<span class="tag">${k + 1}</span><span class="kind">${P.images[k] ? "🖼️" : "✏️"}</span></div>`).join("");
+  $("selRow").style.display = selThumb >= 0 ? "flex" : "none";
+}
+
+/* ======================= VOCE (GEMINI TTS) ======================= */
+function toSentence(s) { s = String(s).toLowerCase(); return s.replace(/(^|[.!?]\s+)([a-zà-ù])/g, (m, a, b) => a + b.toUpperCase()); }
+function speechText(t) {
+  let s = t.narratore;
+  if (t.dialogo) s += " " + (t.parlante ? t.parlante + " dice: " : "") + t.dialogo;
+  if (t.focus) s += " Ricorda: " + t.focus;
+  return toSentence(s);
+}
+function audioKey(k) { return hash(speechText(P.story.tavole[k]) + "|" + getVoice()); }
+function audioOk(k) { return !!(P.audio[k] && P.audio[k].h === audioKey(k)); }
+function pcmToWavDataUri(b64, rate) {
+  const bin = atob(b64), len = bin.length, bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+  let wav;
+  if (len > 12 && String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) === "RIFF") wav = bytes;
+  else {
+    wav = new Uint8Array(44 + len); const v = new DataView(wav.buffer);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, "RIFF"); v.setUint32(4, 36 + len, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, len, true);
+    wav.set(bytes, 44);
+  }
+  let s = ""; for (let i = 0; i < wav.length; i += 32768) s += String.fromCharCode.apply(null, wav.subarray(i, i + 32768));
+  return "data:audio/wav;base64," + btoa(s);
+}
+const TTS = {
+  pool: null, dead: new Set(),
+  async models(key) {
+    if (this.pool) return this.pool;
+    const fb = ["gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts"];
+    let r;
+    try { r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=" + encodeURIComponent(key)); }
+    catch (e) { throw new Error("NESSUNA CONNESSIONE A INTERNET."); }
+    if (r.status === 400 || r.status === 401 || r.status === 403) throw new Error("LA CHIAVE NON È VALIDA (ERRORE " + r.status + "). CONTROLLALA IN ⚙️.");
+    if (r.ok) {
+      const d = await r.json();
+      const ver = n => { const m = n.match(/(\d+)\.(\d+)/); return m ? (+m[1]) * 100 + (+m[2]) : 0; };
+      const l = (d.models || []).map(m => String(m.name).replace(/^models\//, "")).filter(n => /tts/i.test(n) && !/pro/i.test(n));
+      l.sort((a, b) => (ver(b) - ver(a)) || (/lite/i.test(a) - /lite/i.test(b)));
+      if (l.length) { this.pool = l; return l; }
+    }
+    this.pool = fb; return fb;
+  },
+  async speak(key, text, voice) {
+    const pool = await this.models(key); let last = "";
+    for (const m of pool) {
+      if (this.dead.has(m)) continue;
+      let r;
+      try {
+        r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent?key=${encodeURIComponent(key)}`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } } })
+        });
+      } catch (e) { last = "nessuna connessione"; continue; }
+      if (!r.ok) { last = m + " errore " + r.status; if ([400, 403, 404, 429].includes(r.status)) this.dead.add(m); continue; }
+      const d = await r.json();
+      const parts = (((d.candidates || [])[0] || {}).content || {}).parts || [];
+      const p = parts.find(x => x.inlineData && x.inlineData.data);
+      if (!p) { last = m + " senza audio"; continue; }
+      const rm = String(p.inlineData.mimeType || "").match(/rate=(\d+)/);
+      return pcmToWavDataUri(p.inlineData.data, rm ? +rm[1] : 24000);
+    }
+    throw new Error(/429/.test(last) ? "LIMITE GIORNALIERO DELLE VOCI GRATUITE RAGGIUNTO. RIPROVA DOMANI: LE VOCI FATTE RESTANO SALVATE." : "VOCE NON GENERATA (" + last + ").");
+  }
+};
+let generating = false;
+async function generaVoci() {
+  if (!P.story) { toast("PRIMA CARICA LA STORIA (PUNTO 1)"); return; }
+  const key = getKey();
+  if (!key) { toast("⚙️ INSERISCI PRIMA LA CHIAVE"); openSettings(); return; }
+  if (generating) return;
+  generating = true; TTS.dead.clear(); refresh();
+  const n = P.story.tavole.length;
+  try {
+    for (let k = 0; k < n; k++) {
+      if (audioOk(k)) continue;
+      $("i3").textContent = `⏳ GENERO LA VOCE DELLA TAVOLA ${k + 1} DI ${n}...`;
+      const wav = await TTS.speak(key, speechText(P.story.tavole[k]), getVoice());
+      P.audio[k] = { h: audioKey(k), wav };
+      await save(); refresh();
+      if (k < n - 1) await new Promise(r => setTimeout(r, 1200));
+    }
+    toast("✅ TUTTE LE VOCI SONO PRONTE!");
+  } catch (e) {
+    $("i3").innerHTML = `<span class="err">❌ ${esc(e.message)}</span>`;
+  }
+  generating = false; refresh();
+}
+
+/* ======================= ANTEPRIMA, MAPPA, FILE PER MARCO ======================= */
+function buildData() {
+  const st = P.story;
+  return {
+    titolo: st.titolo,
+    tavole: st.tavole.map((t, k) => ({
+      titolo: t.titolo, narratore: t.narratore, parlante: t.parlante, dialogo: t.dialogo, focus: t.focus,
+      img: P.images[k] || "", svg: P.images[k] ? "" : t.svg,
+      audio: audioOk(k) ? P.audio[k].wav : "", parlato: speechText(t)
+    }))
+  };
+}
+let viewerCtl = null;
+function openViewer() {
+  if (!P.story) { toast("PRIMA CARICA LA STORIA (PUNTO 1)"); return; }
+  if (!document.getElementById("pmcss")) { const s = document.createElement("style"); s.id = "pmcss"; s.textContent = PLAYER_CSS.replace("body{margin:0;background:#FFFDF7}", ""); document.head.appendChild(s); }
+  const v = $("viewer"); v.innerHTML = ""; const root = document.createElement("div"); v.appendChild(root);
+  v.classList.add("open"); document.body.style.overflow = "hidden";
+  viewerCtl = playerMain(buildData(), root, { onClose: () => { v.classList.remove("open"); v.innerHTML = ""; document.body.style.overflow = ""; } });
+}
+const MAP_COLORS = ["#BFDBFE", "#BBF7D0", "#FEF08A", "#FED7AA", "#FBCFE8", "#DDD6FE"];
+function openMap() {
+  if (!P.story) { toast("PRIMA CARICA LA STORIA (PUNTO 1)"); return; }
+  const st = P.story, f = $("foglio");
+  let h = `<h3>${esc(st.titolo)}</h3><div class="mboxes">`;
+  st.mappa.forEach((b, i) => {
+    if (i) h += `<div class="mfr">▼</div>`;
+    h += `<div class="mbox" style="background:${MAP_COLORS[i % 6]}"><div class="mico">${esc(b.icona)}</div><div><div class="mtit"><span class="mn">${i + 1}</span>${esc(b.titolo)}</div><div class="mtxt">${esc(b.testo)}</div></div></div>`;
+  });
+  f.innerHTML = h + "</div>";
+  $("mappaView").classList.add("open"); document.body.style.overflow = "hidden";
+  f.querySelectorAll(".mbox").forEach(d => { let fs = 20; const t = d.querySelector(".mtxt"); while (d.scrollHeight > d.clientHeight && fs > 11) { fs--; t.style.fontSize = fs + "px"; } });
+  fitMap();
+}
+function fitMap() {
+  const f = $("foglio"), w = window.innerWidth - 16, s = Math.min(1, w / 794);
+  f.style.transform = `scale(${s})`; f.parentElement.style.height = (1123 * s + 20) + "px";
+}
+window.addEventListener("resize", () => { if ($("mappaView").classList.contains("open")) fitMap(); });
+
+let lastExport = null;
+function buildExportHtml() {
+  const data = buildData();
+  const json = JSON.stringify(data).replace(/</g, "\\u003c").split(String.fromCharCode(0x2028)).join("\\u2028").split(String.fromCharCode(0x2029)).join("\\u2029");
+  return "<!DOCTYPE html>\n<html lang=\"it\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" +
+    "<title>" + esc(data.titolo) + "</title><style>" + PLAYER_CSS + "</style></head><body><div id=\"root\"></div><script>\"use strict\";var DATA=" + json + ";\n" +
+    playerMain.toString() + "\nplayerMain(DATA,document.getElementById(\"root\"),{});<\/script></body></html>";
+}
+function exportFile() {
+  if (!P.story) { toast("PRIMA CARICA LA STORIA (PUNTO 1)"); return; }
+  const n = P.story.tavole.length, ready = P.story.tavole.filter((_, k) => audioOk(k)).length;
+  const html = buildExportHtml();
+  const name = P.story.file + ".html";
+  lastExport = { html, name };
+  const mb = (html.length / 1048576).toFixed(1);
+  $("iExp").innerHTML = `FILE: <b>${esc(name)}</b> (${mb} MB).<br>` + (ready < n ? `<span class="warn">⚠️ VOCI PRONTE ${ready} SU ${n}: LE ALTRE TAVOLE USERANNO LA VOCE DEL TABLET.</span>` : "✅ TUTTE LE VOCI INCLUSE: FUNZIONA SENZA INTERNET.");
+  $("mExport").classList.add("open");
+}
+function download(html, name) {
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+async function shareFile() {
+  if (!lastExport) return;
+  try {
+    const f = new File([lastExport.html], lastExport.name, { type: "text/html" });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: P.story.titolo }); return; }
+  } catch (e) { if (e && e.name === "AbortError") return; }
+  download(lastExport.html, lastExport.name);
+  toast("📥 IL TELEFONO NON PERMETTE L'INVIO DIRETTO: FILE SCARICATO IN DOWNLOAD.");
+}
+
+/* ======================= IMPOSTAZIONI ======================= */
+function openSettings() {
+  $("inKey").value = getKey(); $("inKey").type = "password";
+  $("inVoice").innerHTML = VOICES.map(v => `<option${v === getVoice() ? " selected" : ""}>${v}</option>`).join("");
+  $("iSet").textContent = getKey() ? "✅ CHIAVE SALVATA SU QUESTO TELEFONO." : "SERVE LA CHIAVE GRATUITA DI GOOGLE AI STUDIO PER LE VOCI.";
+  $("mSettings").classList.add("open");
+}
+function saveSettings() {
+  LS.set("marco_api_key", $("inKey").value.trim()); LS.set("marco_voice", $("inVoice").value);
+  TTS.pool = null; $("iSet").textContent = "✅ SALVATO."; refresh();
+}
+async function testVoice() {
+  saveSettings();
+  const key = getKey(); if (!key) { $("iSet").textContent = "INSERISCI LA CHIAVE."; return; }
+  $("iSet").textContent = "⏳ PROVO LA VOCE (1 CHIAMATA)...";
+  try { TTS.dead.clear(); const wav = await TTS.speak(key, "Ciao Marco! Sono la voce del tuo fumetto.", getVoice()); new Audio(wav).play(); $("iSet").textContent = "✅ VOCE FUNZIONANTE."; }
+  catch (e) { $("iSet").innerHTML = `<span class="err">❌ ${esc(e.message)}</span>`; }
+}
+
+/* ======================= INTERFACCIA ======================= */
+function refresh() {
+  const st = P.story;
+  $("projTitle").textContent = st ? "📖 " + st.titolo : "NESSUN COMPITO CARICATO";
+  $("c1").classList.toggle("ok", !!st);
+  const nImg = st ? P.images.filter(Boolean).length : 0;
+  $("c2").classList.toggle("ok", nImg > 0);
+  renderThumbs();
+  const n = st ? st.tavole.length : 0, ready = st ? st.tavole.filter((_, k) => audioOk(k)).length : 0;
+  $("vBar").style.width = n ? (ready / n * 100) + "%" : "0";
+  $("c3").classList.toggle("ok", n > 0 && ready === n);
+  if (!generating) $("i3").textContent = st ? `VOCI PRONTE: ${ready} SU ${n}.` + (getKey() ? "" : " ⚙️ MANCA LA CHIAVE.") : "";
+  $("bVoices").disabled = generating;
+  $("bVoices").textContent = generating ? "⏳ GENERO..." : (ready && ready < n ? "🔊 CONTINUA VOCI" : "🔊 GENERA VOCI");
+  $("c4").classList.toggle("ok", !!st);
+}
+$("bSettings").onclick = openSettings;
+$("bCloseSet").onclick = () => $("mSettings").classList.remove("open");
+$("bSaveSet").onclick = saveSettings;
+$("bTestVoice").onclick = testVoice;
+$("bShowKey").onclick = () => { $("inKey").type = $("inKey").type === "password" ? "text" : "password"; };
+$("bReset").onclick = async () => { P = { story: null, images: [], audio: [] }; await save(); $("i1").textContent = ""; $("i2").textContent = ""; selThumb = -1; refresh(); $("mSettings").classList.remove("open"); toast("🗑️ COMPITO CANCELLATO"); };
+$("bPaste").onclick = async () => {
+  try { const t = await navigator.clipboard.readText(); if (!t || t.indexOf("{") < 0) throw new Error("vuoto"); await loadStoryText(t); }
+  catch (e) { $("taStory").classList.add("open"); $("manualRow").style.display = "flex"; $("taStory").focus(); toast("INCOLLA IL TESTO NEL RIQUADRO E PREMI ✅"); }
+};
+$("bManual").onclick = () => { $("taStory").classList.add("open"); $("manualRow").style.display = "flex"; $("taStory").focus(); };
+$("bUseText").onclick = () => loadStoryText($("taStory").value);
+$("bFile").onclick = () => $("fStory").click();
+$("fStory").onchange = async e => { const f = e.target.files[0]; if (f) await loadStoryText(await f.text()); e.target.value = ""; };
+$("bImgs").onclick = () => { if (!P.story) { toast("PRIMA CARICA LA STORIA (PUNTO 1)"); return; } $("fImgs").click(); };
+$("fImgs").onchange = async e => { await onImagesChosen(e.target.files); e.target.value = ""; };
+$("thumbs").onclick = async e => {
+  const t = e.target.closest(".thumb"); if (!t) return;
+  const k = +t.dataset.k;
+  if (selThumb < 0) { selThumb = k; }
+  else if (selThumb === k) { selThumb = -1; }
+  else { const a = P.images[selThumb]; P.images[selThumb] = P.images[k]; P.images[k] = a; selThumb = -1; await save(); toast("🔄 VIGNETTE SCAMBIATE"); }
+  refresh();
+};
+$("bReplace").onclick = () => $("fOne").click();
+$("fOne").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f || selThumb < 0) return;
+  const im = await fileToImage(f); const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext("2d").drawImage(im, 0, 0);
+  P.images[selThumb] = canvasToJpeg(c); selThumb = -1; await save(); refresh();
+};
+$("bRemove").onclick = async () => { if (selThumb < 0) return; P.images[selThumb] = null; selThumb = -1; await save(); refresh(); };
+$("bVoices").onclick = generaVoci;
+$("bPreview").onclick = openViewer;
+$("bMap").onclick = openMap;
+$("bPrint").onclick = () => window.print();
+$("bCloseMap").onclick = () => { $("mappaView").classList.remove("open"); document.body.style.overflow = ""; };
+$("bExport").onclick = exportFile;
+$("bShare").onclick = shareFile;
+$("bDownload").onclick = () => lastExport && download(lastExport.html, lastExport.name);
+$("bCloseExp").onclick = () => $("mExport").classList.remove("open");
+
+(async () => {
+  const saved = await DB.get("progetto");
+  if (saved && saved.story) {
+    P = saved; P.images = P.images || []; P.audio = P.audio || [];
+    P.story.tavole.forEach(t => { if (!t.svg) t.svg = composeScene(t.disegno); });
+    $("i1").innerHTML = `✅ <b>${esc(P.story.titolo)}</b>: ${P.story.tavole.length} TAVOLE (RIPRESO DALL'ULTIMA VOLTA).`;
+  }
+  refresh();
+  if ("serviceWorker" in navigator && location.protocol === "https:") { try { navigator.serviceWorker.register("sw.js"); } catch (e) {} }
+})();
+</script>
+</body>
+</html>
