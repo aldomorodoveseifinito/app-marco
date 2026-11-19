@@ -78,12 +78,10 @@ input[type=text],input[type=password],select{width:100%;font:inherit;border:3px 
   <p class="sub" id="projTitle">NESSUN COMPITO CARICATO</p>
 
   <div class="card" id="c1">
-    <h2><span class="num">1</span> STORIA DI GEMINI</h2>
-    <p class="info">In Gemini tocca "Copia" sul blocco del file storia, poi qui:</p>
+    <h2><span class="num">1</span> STORIA</h2>
+    <p class="info">Copia la storia che ti ha dato Claude, poi tocca:</p>
     <div class="row">
-      <button class="btn y" id="bPaste">📋 INCOLLA STORIA</button>
-      <button class="btn s" id="bManual">✍️ INCOLLA A MANO</button>
-      <button class="btn s" id="bFile">📄 CARICA FILE</button>
+      <button class="btn y" id="bPaste">📋 INCOLLA</button>
       <input type="file" id="fStory" accept=".txt,.json,text/plain,application/json" hidden>
     </div>
     <textarea id="taStory" placeholder="Incolla qui il file storia..."></textarea>
@@ -369,9 +367,22 @@ function composeScene(d) {
     calendario: (x, y) => A.calendar(x, y, 1), fumetto: (x, y) => A.bubble(x, y, 1), ok: (x, y) => A.sign(x, y, "ok", 1.1),
     no: (x, y) => A.sign(x, y, "no", 1.1), freccia: (x, y) => A.sign(x, y, "freccia", 1.1)
   };
-  const slots = [[300, 100], [175, 110], [425, 110], [545, 235]];
-  let k = 0;
-  ogg.forEach(o => { if (o === "banco" || !mapO[o] || k >= slots.length) return; const [x, y] = slots[k++]; s += mapO[o](x, y); });
+  /* disegni per esercizi: molecole, crocette, emoji */
+  const mol = n => (x, y, big) => { const r = big ? 70 : 52, pts = { strette: 0, vicine: 1, lontane: 2 }[n]; let b = "";
+    const grid = pts === 0 ? [-2,-1,0,1,2].flatMap(i => [-2,-1,0,1,2].map(j => [i * 0.36, j * 0.36]))
+      : pts === 1 ? [[-.5,-.5],[0,-.55],[.5,-.5],[-.55,0],[0,0],[.55,0],[-.5,.5],[0,.55],[.5,.5]]
+      : [[-.45,-.4],[.4,-.5],[0,.05],[-.5,.45],[.45,.4]];
+    grid.forEach(([i, j]) => { if (i * i + j * j < 0.9) b += `<circle cx="${i * r}" cy="${j * r}" r="${r * (pts === 0 ? .17 : .14)}" fill="#BFDBFE" stroke="#1E3A8A" stroke-width="2"/>`; });
+    return `<g transform="translate(${x},${y})"><circle r="${r}" fill="#FFF" ${A.K}/>${b}</g>`; };
+  mapO.molecole_strette = mol("strette"); mapO.molecole_vicine = mol("vicine"); mapO.molecole_lontane = mol("lontane");
+  mapO.crocetta = (x, y, big) => { const r = big ? 40 : 30; return `<g transform="translate(${x},${y})"><rect x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}" rx="6" fill="#FFF" ${A.K}/><path d="M${-r * .6},${-r * .6} L${r * .6},${r * .6} M${r * .6},${-r * .6} L${-r * .6},${r * .6}" stroke="#DC2626" stroke-width="8" stroke-linecap="round"/></g>`; };
+  mapO.casella = (x, y, big) => { const r = big ? 40 : 30; return `<g transform="translate(${x},${y})"><rect x="${-r}" y="${-r}" width="${2 * r}" height="${2 * r}" rx="6" fill="#FFF" ${A.K}/></g>`; };
+  const emo = (e) => (x, y, big) => `<text x="${x}" y="${y}" font-size="${big ? 96 : 64}" text-anchor="middle" dominant-baseline="central">${e.replace(/[<>&]/g, "")}</text>`;
+  const items = ogg.filter(o => o !== "banco").map(o => mapO[o] || (/[^\x00-\x7F]/.test(o) ? emo(o) : null)).filter(Boolean).slice(0, 4);
+  const big = pers.length === 0;
+  const slots = big ? ({ 1: [[300, 228]], 2: [[180, 228], [420, 228]], 3: [[110, 228], [300, 228], [490, 228]], 4: [[90, 228], [230, 228], [370, 228], [510, 228]] }[items.length] || [])
+    : [[300, 100], [175, 110], [425, 110], [545, 235]];
+  items.forEach((f, k) => { const [x, y] = slots[k]; s += f(x, y, big); });
   return `<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
 }
 
@@ -507,6 +518,15 @@ function canvasToJpeg(cv, maxW) {
 }
 function splitPanels(im) {
   const W = im.naturalWidth, H = im.naturalHeight;
+  /* griglia quadrata 2x2 (Gemini): taglio fisso in 4 quarti, senza indovinare i bordi */
+  if (W / H > 0.85 && W / H < 1.18) {
+    const full = document.createElement("canvas"); full.width = W; full.height = H; full.getContext("2d").drawImage(im, 0, 0);
+    const hw = Math.floor(W / 2), hh = Math.floor(H / 2), mx = Math.round(W * 0.012), my = Math.round(H * 0.012);
+    return [[0, 0], [hw, 0], [0, hh], [hw, hh]].map(([x, y]) => {
+      const cw = hw - 2 * mx, ch = hh - 2 * my, cv = document.createElement("canvas"); cv.width = cw; cv.height = ch;
+      cv.getContext("2d").drawImage(full, x + mx, y + my, cw, ch, 0, 0, cw, ch); return canvasToJpeg(cv);
+    });
+  }
   const aw = Math.min(480, W), sc = aw / W, ah = Math.max(1, Math.round(H * sc));
   const ac = document.createElement("canvas"); ac.width = aw; ac.height = ah;
   const actx = ac.getContext("2d"); actx.drawImage(im, 0, 0, aw, ah);
@@ -794,9 +814,9 @@ $("bPaste").onclick = async () => {
   try { const t = await navigator.clipboard.readText(); if (!t || t.indexOf("{") < 0) throw new Error("vuoto"); await loadStoryText(t); }
   catch (e) { $("taStory").classList.add("open"); $("manualRow").style.display = "flex"; $("taStory").focus(); toast("INCOLLA IL TESTO NEL RIQUADRO E PREMI ✅"); }
 };
-$("bManual").onclick = () => { $("taStory").classList.add("open"); $("manualRow").style.display = "flex"; $("taStory").focus(); };
+if ($("bManual")) $("bManual").onclick = () => { $("taStory").classList.add("open"); $("manualRow").style.display = "flex"; $("taStory").focus(); };
 $("bUseText").onclick = () => loadStoryText($("taStory").value);
-$("bFile").onclick = () => $("fStory").click();
+if ($("bFile")) $("bFile").onclick = () => $("fStory").click();
 $("fStory").onchange = async e => { const f = e.target.files[0]; if (f) await loadStoryText(await f.text()); e.target.value = ""; };
 $("bImgs").onclick = () => { if (!P.story) { toast("PRIMA CARICA LA STORIA (PUNTO 1)"); return; } $("fImgs").click(); };
 $("fImgs").onchange = async e => { await onImagesChosen(e.target.files); e.target.value = ""; };
